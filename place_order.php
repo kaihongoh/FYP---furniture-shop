@@ -54,10 +54,15 @@ $email=$user_data['email'];
 
 $shipping_name = $address['Full_Name'] ?? null;
 $shipping_phone= $address['Phone'] ?? null;
-$shipping_address=trim($address['Unit_No'] ? $address['Unit_No'].", " : "") .
-                    $address['Address'].", ".
-                    $address['postcode'].", ".
-                    $address['State'];
+$shipping_address=$address['address_line1'];
+if(!empty($address['address_line2'])) {
+    $shipping_address .=', ' . $address['address_line2'];
+}
+$shipping_address .=', ' . $address['city'] . ', ' . $address['postcode'] . ', ' . $address['State'];
+
+if(!empty($address['Unit_No'])) {
+    $shipping_address =$address['Unit_No'] . ', ' . $shipping_address;
+}
 
 //check items
 $items=$_SESSION['checkout_items'] ?? [];
@@ -78,7 +83,9 @@ $order_items=[];
 foreach($items as $cart_id) {
     $stmt=$conn->prepare("SELECT cart.Variant_ID, cart.Quantity, 
     product_variant.Price, product_variant.Stock, 
-    product_variant.Status, product.Product_Name, 
+    product_variant.Status AS variant_status, 
+    product.status AS product_status,
+    product.Product_Name, 
     product.Product_Picture, product_variant.Variant_Image, product_variant.Color
     FROM cart 
     JOIN product_variant ON cart.Variant_ID = product_variant.Variant_ID 
@@ -98,12 +105,18 @@ foreach($items as $cart_id) {
         $quantity= $cart_item['Quantity'] ?? null;
         $price = $cart_item['Price'] ?? null;
 
-    if($cart_item['Status'] !== 'Active') {
-        throw new Exception("Some item are no longer available or out of stock.");
+    if(strtolower($cart_item['product_status']) !== 'active' || strtolower($cart_item['variant_status']) !== 'active') {
+        throw new Exception("Some items are no longer available or out of stock.");
     }
 
     if($quantity > $cart_item['Stock']) { 
         throw new Exception("Sorry, some items are exceed the available stock. Please adjust your cart and try again.");
+    }
+    $final_picture="";
+    if(!empty($cart_item['Variant_Image'])) {
+        $final_picture='uploads/variants/' . $cart_item['Variant_Image'];
+    } else {
+        $final_picture='uploads/products/' . $cart_item['Product_Picture'];
     }
         //recalculate subtotal in case price has changed since checkout page loaded
         $subtotal += $price * $quantity;
@@ -112,7 +125,7 @@ foreach($items as $cart_id) {
             'Quantity' => $quantity,
             'Price' => $price,
             'Product_Name' =>$cart_item['Product_Name'],
-            'Product_Picture' =>!empty($cart_item['Variant_Image']) ? $cart_item['Variant_Image'] : $cart_item['Product_Picture'],
+            'Product_Picture' =>$final_picture,
             'Color' =>$cart_item['Color']
         ];
 }
@@ -121,16 +134,32 @@ if(empty($order_items)) {
 }
 
 //recalculate tax and shipping fee based on new subtotal and address
-$setting=$conn->query("SELECT * FROM settings LIMIT 1")->fetch_assoc();
+$setting_result=$conn->query("SELECT * FROM settings LIMIT 1");
+$setting=$setting_result->fetch_assoc();
 $tax_rate = $setting['Tax_Rate']/100;
+//get shipping fee from shipping fee setting
+$shipping_fee=0;
+    if ($address && !empty($address['State'])) {
+        $set_shipping_fee=$conn->prepare("SELECT shipping_fee FROM shipping_fee_setting WHERE state_name=? AND status='Active' LIMIT 1");
+        $set_shipping_fee->bind_param("s", $address['State']);
+        $set_shipping_fee->execute();
+        $result=$set_shipping_fee->get_result();
+
+        if($row=$result->fetch_assoc()) {
+            $shipping_fee=$row['shipping_fee'];
+        }
+        $set_shipping_fee->close();
+    } 
+    if($shipping_fee === 0) { //default shipping fee, normally would not happen
+        $shipping_fee=19;
+    }
+
 $tax=$subtotal * $tax_rate; // calculate tax based on tax rate from settings
 
 $delivery_days=0;
     if ($address && ($address['State'] === 'Sabah' || $address['State'] === 'Sarawak')) {
-        $shipping_fee=$setting['Shipping_East'];
         $delivery_days=14;
     } else {
-        $shipping_fee=$setting['Shipping_West'];
         $delivery_days=7;
     }
 
@@ -144,8 +173,8 @@ if(!empty($_SESSION['voucher_id'])) {
     //revalidate voucher before apply 
         $stmt=$conn->prepare("SELECT * FROM vouchers WHERE Voucher_ID = ? 
         AND Status = 'Active' 
-        AND Expiry_Date >= NOW() 
-        AND (Usage_Limit IS NULL OR Used_Count < Usage_Limit) FOR UPDATE");
+        AND (Expiry_Date IS NULL OR DATE(Expiry_Date)>= CURDATE()) 
+        AND (Usage_Limit >0 AND Used_Count < Usage_Limit) FOR UPDATE"); 
         $stmt->bind_param("i", $voucher_id);
         $stmt->execute();
         $voucher=$stmt->get_result()->fetch_assoc();
@@ -160,7 +189,7 @@ if(!empty($_SESSION['voucher_id'])) {
             $usage_data=$usage_stmt->get_result()->fetch_assoc();
             $used=$usage_data['used'];
 
-            if(!is_null($voucher['Usage_Per_User']) && $used>=$voucher['Usage_Per_User']) {
+            if(($voucher['Usage_Per_User'] <=0) || $used>=$voucher['Usage_Per_User']) {
                 $discount=0;
                 $voucher_id=null;
                 $voucher=null;
@@ -181,12 +210,6 @@ if(!empty($_SESSION['voucher_id'])) {
             }
             $discount =min($discount,$subtotal);
             $discount=round($discount,2);
-
-        //update voucher use count
-        $stmt2=$conn->prepare("UPDATE vouchers SET Used_Count = Used_Count + 1 WHERE Voucher_ID = ?");
-        $stmt2->bind_param("i", $voucher_id);
-        $stmt2->execute();
-
     } else {
         $discount=0;
         $voucher_id=null;
@@ -199,22 +222,22 @@ $total=max(0, $subtotal + $tax + $shipping_fee - $discount);
 //create order 
 $payment_status = 'Pending';
 $order_status = 'Pending';
+$payment_method = 'Card';
 
-$expire_at = date('Y-m-d H:i:s', strtotime('+5 minutes'));
 
 $stmt=$conn->prepare("INSERT INTO orders 
 (Order_Number, User_ID, Customer_Email, Subtotal, Discount_Amount, Voucher_ID,
 Total_Amount, Shipping_Address, Shipping_Phone, Shipping_Name, 
-Shipping_Fee, Estimated_Delivery_Date, Tax_Amount, Payment_Method, Payment_Status, Order_Status, Expire_At)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-$stmt->bind_param("sisddidsssdsdssss", $order_number, $user_id, $email, $subtotal, $discount, $voucher_id, $total, $shipping_address, $shipping_phone, $shipping_name, $shipping_fee, $estimate_date, $tax, $payment_method, $payment_status, $order_status, $expire_at);
+Shipping_Fee, Estimated_Delivery_Date, Tax_Amount, Payment_Method, Payment_Status, Order_Status)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt->bind_param("sisddidsssdsdsss", $order_number, $user_id, $email, $subtotal, $discount, $voucher_id, $total, $shipping_address, $shipping_phone, $shipping_name, $shipping_fee, $estimate_date, $tax, $payment_method, $payment_status, $order_status);
 
 $stmt->execute();
 
 $order_id = $conn->insert_id;
 
 
-//insert order item
+//insert order item 
 foreach($order_items as $item) {
 
     //insert snapshot (product name,picture,color )
@@ -225,13 +248,7 @@ foreach($order_items as $item) {
     $stmt2->execute();
 }
 
-if(!empty($voucher_id)) {
-    //record the usage of voucher (need $order_id)
-    $stmt_usage=$conn->prepare("INSERT INTO voucher_usage (User_ID, Voucher_ID, Order_ID)
-    VALUES (?, ?, ?)");
-    $stmt_usage->bind_param("iii", $user_id, $voucher_id, $order_id);
-    $stmt_usage->execute();
-}
+
 
 //clear cart
 $placeholder=implode(',', array_fill(0, count($items), '?'));
@@ -243,10 +260,118 @@ $stmt->bind_param($types,...$params);
 $stmt->execute();
 
 
+$card_number=preg_replace('/\D/','',$_POST['card_number'] ?? '');
+$card_holder=trim($_POST['card_holder'] ?? '');
+$expiry=trim($_POST['expiry_date'] ?? '');
+$cvv=trim($_POST['cvv'] ??'');
 
+//validate
+if(strlen($card_number)!==16) {
+    throw new Exception("Card number must be exactly 16 digits.");
+}
+if(!preg_match('/^[a-zA-Z\s]+$/',$card_holder)) {
+    throw new Exception("Card holder name must contain only letter and spaces.");
+}
+if(!preg_match('/^(0[1-9]|1[0-2])\/([0-9]{2})$/',$expiry)) {
+    throw new Exception("Expiration date must be in MM/YY format.");
+}
+if(!preg_match('/^\d{3}$/',$cvv)) {
+    throw new Exception("CVV number must be 3 digit.");//can enter abc?
+} 
+
+//check card expiry
+list ($month,$year)=explode('/', $expiry);
+$year=2000 + (int)$year;
+$month=(int)$month;
+
+$now=new DateTime();
+$date=new DateTime("$year-$month-01");
+$date->modify('last day of this month');               
+    if($date < $now) {
+        throw new Exception('Card has expired.');
+    }
+
+    //deduct stock after order created
+    foreach($order_items as $item) {
+    $update_stock=$conn->prepare("UPDATE product_variant SET Stock=Stock-? WHERE Variant_ID=? AND Stock>=? AND Status='Active'");
+    $update_stock->bind_param("iii", $item["Quantity"], $item["Variant_ID"], $item["Quantity"]);
+    if(!$update_stock->execute() || $update_stock->affected_rows === 0) {
+        throw new Exception("Stock insufficient for variant " .$item['Variant_ID']);
+    }
+}
+
+    //updte to paid
+    $update_order=$conn->prepare("UPDATE orders SET Payment_Status='Paid', Order_Status='Paid' WHERE Order_ID=?");
+    $update_order->bind_param("i", $order_id);
+    $update_order->execute();
+
+    //update voucher use count
+    if($voucher_id && $voucher && $discount > 0) {
+    $stmt2=$conn->prepare("UPDATE vouchers SET Used_Count = Used_Count + 1 WHERE Voucher_ID = ?");
+    $stmt2->bind_param("i", $voucher_id);
+    $stmt2->execute();
+    //record the usage of voucher 
+    $stmt_usage=$conn->prepare("INSERT INTO voucher_usage (User_ID, Voucher_ID, Order_ID)
+    VALUES (?, ?, ?)");
+    $stmt_usage->bind_param("iii", $user_id, $voucher_id, $order_id);
+    $stmt_usage->execute();
+    }
 
 $conn->commit();
 
+//send order confirmation email
+//take latest order
+$order=$conn->query("SELECT * FROM orders WHERE Order_ID = $order_id")->fetch_assoc();
+
+//get order item
+$stmt_items=$conn->prepare("SELECT Product_Name, Product_Picture, Variant_Color, Quantity, Price
+FROM order_items
+WHERE Order_ID=?");
+$stmt_items->bind_param("i", $order_id);
+$stmt_items->execute();
+$items_result=$stmt_items->get_result();
+
+        $items_html="";
+        while($item=$items_result->fetch_assoc()) {
+            $img_src=htmlspecialchars($item["Product_Picture"]);  
+            $items_html .="
+            <tr>
+            <td>
+            ". htmlspecialchars($item["Product_Name"]) . "
+            </td>
+            <td>". htmlspecialchars($item["Variant_Color"]) ."</td>
+            <td>" . $item["Quantity"] . "</td>
+            <td>RM ". number_format($item["Price"],2) . "</td>
+            <td>RM ". number_format($item["Price"] * $item['Quantity'],2) . "</td>
+            </tr>";
+        }
+            //email content
+            $subject="Order Confirmation - ".$order['Order_Number'];
+            $body= "<h1>Thank you for your order!</h1>";
+            $body.= "<p>Your order number is: <strong>" . $order['Order_Number'] ."</strong></p>";
+            $body.= "<h3>Order details: </h3>";
+            $body.="<table border='1' cellpadding='5' style='border-collapse: collapse;'>";
+            $body.="<tr>
+            <th>Product</th>
+            <th>Color</th>
+            <th>Quantity</th>
+            <th>Price</th>
+            <th>Total</th>
+            </tr>";
+            $body.=$items_html;
+            $body.="</table>";
+            $body.= "<p><strong>Subtotal: </strong> RM ".number_format($order['Subtotal'],2) . "</p>";
+            $body.= "<p><strong>Shipping fee: </strong> RM ". number_format($order["Shipping_Fee"],2) . "</p>";
+            $body.= "<p><strong>Tax: </strong> RM ". number_format($order["Tax_Amount"],2) . "</p>";
+            $body.= "<p><strong>Discount: </strong> -RM ". number_format($order["Discount_Amount"],2) . "</p>";
+            $body.= "<p><strong>Total: </strong> RM ". number_format($order["Total_Amount"],2) . "</p>";
+            $body.="<p><strong>You may check on the Order History! <a href='http://localhost/FYP/fyp_project/order_history.php'>http://localhost/FYP/fyp_project/home.php</strong></a></p>";
+            $body.= "<p>Thank you for your purchase. We appreciate your support and are thrilled you chose us.</p>";
+            
+            $result=sendOrderEmail($order['Customer_Email'], $subject, $body);
+            if($result !== true){
+                error_log("Order confirmation email failed for order #{$order_id}: " . $result);
+            }   
 
 $_SESSION['last_order_id']=$order_id;
 $_SESSION['pending_order_id']=$order_id;
@@ -256,10 +381,10 @@ unset($_SESSION['checkout_items']);
 unset($_SESSION['voucher_id']);
 unset($_SESSION['discount']);
 
-header("Location: payment.php?order_id=$order_id");
+header("Location: order_confirmation.php?order_id=$order_id");
 exit();
 } catch (Exception $e) {
-    error_log("Order failed: " . $e->getMessage());
+    error_log("Order failed for user $user_id: " . $e->getMessage());
     $conn->rollback();
     unset($_SESSION['order_processing']);
     $_SESSION['error'] = $e->getMessage();
