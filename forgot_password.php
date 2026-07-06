@@ -10,7 +10,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (empty($email)) {
         echo "<script>alert('Please enter your email address.'); window.history.back();</script>";
         exit;
-    }
+    }elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)){
+        echo "<script>alert('The email format is invalid.'); window.history.back();</script>";
+        exit;
+    } 
 
     if (empty($answer)) {
         echo "<script>alert('Please enter your security answer.'); window.history.back();</script>";
@@ -72,7 +75,7 @@ if (!empty($email)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Forgot Password - Ikea4U</title>
+    <title>Forgot Password - HomeNest</title>
     <link rel="stylesheet" href="css/template.css">
     <link rel="stylesheet" href="css/forgot_password.css">
 </head>
@@ -92,6 +95,7 @@ if (!empty($email)) {
                     <input type="email" id="email" name="email" class="form-control" 
                            value="<?php echo htmlspecialchars($email); ?>" required
                            placeholder="Enter your registered email">
+                           <small class="error-message" id="emailError"></small>
                 </div>
                 
                 <div class="form-group">
@@ -100,6 +104,7 @@ if (!empty($email)) {
                            value="<?php echo htmlspecialchars($security_question); ?>" 
                            readonly
                            placeholder="Enter email above to see security question">
+                           
                 </div>
                 
                 <div class="form-group">
@@ -108,9 +113,10 @@ if (!empty($email)) {
                            value="<?php echo htmlspecialchars($_POST['security_answer'] ?? ''); ?>" 
                            required
                            placeholder="Enter your security answer">
+                    <small class="error-message" id="securityAnswerError"></small>
                 </div>
 
-                <button type="submit" class="btn-login">Verify</button>
+                <button type="submit" id="submitBtn" class="btn-login">Verify</button>
                 
                 <div class="auth-link">
                     <p>Remember your password? <a href="login.php">Login here</a></p>
