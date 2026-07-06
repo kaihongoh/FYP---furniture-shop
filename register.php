@@ -5,8 +5,10 @@ $user_name="";
 $full_name="";
 $email="";
 $phoneNumber="";
-$address="";
+$address_line1="";
+$address_line2="";
 $state="";
+$city="";
 $postcode="";
 $security_question="";
 $security_answer="";
@@ -21,8 +23,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $confirm_password= $_POST['confirmPassword'] ?? '';
     $phoneNumber= trim($_POST['phoneNumber'] ?? '');
     $state = trim($_POST['state'] ?? '');
+    $city=trim($_POST['city'] ?? '');
     $postcode = trim($_POST['postcode'] ?? '');
-    $address= trim($_POST['address'] ?? '');
+    $address_line1= trim($_POST['address_line1'] ?? '');
+    $address_line2= trim($_POST['address_line2'] ?? '');
     $security_question= $_POST['security_question'] ?? '';
     $security_answer= trim($_POST['security_answer'] ?? '');
     $terms = isset($_POST['terms']) ? true : false;
@@ -34,7 +38,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
      if (empty($user_name)) 
         $errors[] = 'Username is required.';
 
-    if (empty($full_name)) //这个要吗？
+    if (empty($full_name)) 
         $errors[] = 'Full name is required.';
 
     if (empty($email)) 
@@ -61,15 +65,18 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if (empty($state)) 
         $errors[] = 'Please select the state.';
 
+    if(empty($city))
+        $errors[] = 'Please select the city.';
+
     if (empty($postcode)) 
         $errors[] = 'Please enter the postcode.';
     elseif (!preg_match('/^\d{5}$/', $postcode)) 
         $errors[] = 'Postcode must be 5 digits.';
     
-    if (empty($address)) 
-        $errors[] = 'Please enter the complete address.';
-    elseif (strlen($address) < 10) 
-        $errors[] = 'Address must be at least 10 characters.';
+    if (empty($address_line1)) 
+        $errors[] = 'Please enter the address line 1 field.';
+    elseif (strlen($address_line1) < 5) 
+        $errors[] = 'Address must be at least 5 characters.';
     
     if (empty($security_question)) 
         $errors[] = 'Please select the security question.';
@@ -90,34 +97,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         return;
     } else {
     // check username is exists
-    $usernameCheckStmt = $conn->prepare("SELECT User_ID FROM users WHERE User_Name = ?");
-    $usernameCheckStmt->bind_param("s", $user_name);
-    $usernameCheckStmt->execute();
-    $usernameCheckStmt->store_result();
+    $CheckUsername = $conn->prepare("SELECT User_ID FROM users WHERE User_Name = ?");
+    $CheckUsername->bind_param("s", $user_name);
+    $CheckUsername->execute();
+    $CheckUsername->store_result();
 
-    if ($usernameCheckStmt->num_rows > 0) {
+    if ($CheckUsername->num_rows > 0) {
         echo "<script>
         alert('Username already taken. Please choose another username.'); 
         </script>";
         $user_name = "";
-        $usernameCheckStmt->close();
+        $CheckUsername->close();
     }else {
-    $usernameCheckStmt->close();
+    $CheckUsername->close();
     
-        // check email address is exists
-    $emailCheckStmt = $conn->prepare("SELECT User_ID FROM users WHERE email = ?");
-    $emailCheckStmt->bind_param("s", $email);
-    $emailCheckStmt->execute();
-    $emailCheckStmt->store_result();
+    // check email address is exists
+    $CheckEmail = $conn->prepare("SELECT User_ID FROM users WHERE email = ?");
+    $CheckEmail->bind_param("s", $email);
+    $CheckEmail->execute();
+    $CheckEmail->store_result();
 
-    if ($emailCheckStmt->num_rows > 0) {
+    if ($CheckEmail->num_rows > 0) {
         echo "<script>
         alert('Email already registered. Please use another email.'); 
         </script>";
         $email = "";
-        $emailCheckStmt->close();  
+        $CheckEmail->close();  
     }else{
-    $emailCheckStmt->close();
+    $CheckEmail->close();
 
     // dont check phone number is exists, same phone number can use in different user and address
     /*$phoneCheckStmt = $conn->prepare(
@@ -144,12 +151,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     
     $conn->begin_transaction();
     try{
+        $default_level_id=1;
     $insertUser = $conn->prepare(
-        "INSERT INTO users (User_Name, email, password, security_question, security_answer, role, created_at) 
-         VALUES (?, ?, ?, ?, ?, ?, NOW())"
+        "INSERT INTO users (level_id, User_Name, email, password, security_question, security_answer, role, created_at) 
+         VALUES (?, ?, ?, ?, ?, ?, ?, NOW())"
     );
     $insertUser->bind_param(
-        "ssssss",
+        "issssss",
+        $default_level_id,
         $user_name,
         $email,
         $hashedPassword,
@@ -163,23 +172,25 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
         $insertAddress= $conn->prepare("INSERT INTO user_address 
         (User_ID, Full_Name, Phone, State, 
-        postcode, Unit_No, Address, 
+        postcode, Unit_No, address_line1, address_line2, city, 
         Label, Is_Default, Created_At)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())"
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())"
         );
         $unit_no="";
         $label="Home";
         $is_default=1;
 
         $insertAddress->bind_param(
-        "isssssssi",
+        "isssssssssi",
         $user_id, 
         $full_name, 
         $phoneNumber, 
         $state, 
         $postcode, 
         $unit_no, 
-        $address, 
+        $address_line1, 
+        $address_line2,
+        $city,
         $label, 
         $is_default
         );
@@ -205,13 +216,26 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 }
 }
 }
+$get_city=$conn->query("SELECT state_name, city_name FROM cities ORDER BY state_name, city_name");
+$city_by_state=[];
+while($city_result=$get_city->fetch_assoc()){
+    $state_data=$city_result['state_name'];
+    $city_data=$city_result['city_name'];
+    if(!isset($city_by_state[$state_data])){
+        $city_by_state[$state_data]=[];
+    }
+    $city_by_state[$state_data][]=$city_data;
+}
+
+
+
 ?>
 
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - Ikea4U</title>
+    <title>Register - HomeNest</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="css/template.css">
     <link rel="stylesheet" href="css/register.css">
@@ -224,7 +248,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         <div class="register-container">
             <div class="form-header">
                 <h2 class="register-title">Create Your Account</h2>
-                <p class="form-subtitle">Join Ikea4U and enjoy quality furniture delivered to your door</p>
+                <p class="form-subtitle">Join HomeNest and enjoy quality furniture delivered to your door</p>
             </div>
 
             <form method="POST" action="" class="register-form" id="registerForm" novalidate>
@@ -276,31 +300,50 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                            placeholder="123-456-7890" required>
                     <small class="password-hint">Format: 012-345-6789</small>
                     <small class="error-message" id="phoneError"></small>
+                </div>                
+                
+                <div class="form-group">
+                    <label class="form-label">Address Line 1</label>
+                    <input type="text" name="address_line1" class="form-control"
+                            value="<?= htmlspecialchars($address_line1) ?>"
+                            placeholder="12, Jalan Bukit Beruang 5" required>
+                    <small class="password-hint">Do not include the state and postcode</small>
+                    <small class="error-message" id="addressError"></small>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Address Line 2 (Optional)</label>
+                    <input type="text" name="address_line2" class="form-control" 
+                            value="<?= htmlspecialchars($address_line2) ?>"
+                              placeholder="Taman Bukit Melaka">
                 </div>
 
+<?php 
+$get_states=$conn->prepare("SELECT state_name FROM shipping_fee_setting WHERE status='Active'
+ORDER BY state_name ASC");
+$get_states->execute();
+$states=$get_states->get_result();
+?>
                 
                 <div class="form-group">
                     <label class="form-label">State </label>
                     <select name="state" id ="stateSelect" class="form-control" required>
                         <option value="">Select your state</option>
-                        <option value="Johor"<?=$state=='Johor'?'selected':''?>>Johor</option>
-                        <option value="Kedah"<?=$state=='Kedah'?'selected':''?>>Kedah</option>
-                        <option value="Kelantan"<?=$state=='Kelantan'?'selected':''?>>Kelantan</option>
-                        <option value="Malacca"<?=$state=='Malacca'?'selected':''?>>Malacca</option>
-                        <option value="Negeri Sembilan"<?=$state=='Negeri Sembilan'?'selected':''?>>Negeri Sembilan</option>
-                        <option value="Pahang"<?=$state=='Pahang'?'selected':''?>>Pahang</option>
-                        <option value="Perak"<?=$state=='Perak'?'selected':''?>>Perak</option>
-                        <option value="Perlis"<?=$state=='Perlis'?'selected':''?>>Perlis</option>
-                        <option value="Penang"<?=$state=='Penang'?'selected':''?>>Penang</option>
-                        <option value="Sabah"<?=$state=='Sabah'?'selected':''?>>Sabah</option>
-                        <option value="Sarawak"<?=$state=='Sarawak'?'selected':''?>>Sarawak</option>
-                        <option value="Selangor"<?=$state=='Selangor'?'selected':''?>>Selangor</option>
-                        <option value="Terengganu"<?=$state=='Terengganu'?'selected':''?>>Terengganu</option>
-                        <option value="Wilayah Persekutuan Kuala Lumpur"<?=$state=='Wilayah Persekutuan Kuala Lumpur'?'selected':''?>>Wilayah Persekutuan Kuala Lumpur</option>
-                        <option value="Wilayah Persekutuan Putrajaya"<?=$state=='Wilayah Persekutuan Putrajaya'?'selected':''?>>Wilayah Persekutuan Putrajaya</option>
-                        <option value="Wilayah Persekutuan Labuan"<?=$state=='Wilayah Persekutuan Labuan'?'selected':''?>>Wilayah Persekutuan Labuan</option>
+                        <?php while($STATE=$states->fetch_assoc()): ?>
+                            <option value="<?=htmlspecialchars($STATE['state_name'])?>"
+                            <?=$state==$STATE['state_name'] ?'selected':''?>> <!--drop down-->
+                            <?=htmlspecialchars($STATE['state_name'])?> 
+                            </option>
+                        <?php endwhile; ?>
                     </select>
                     <small class="error-message" id="stateError"></small>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">City </label>
+                    <select name="city" id ="citySelect" class="form-control" required>
+                        <option value="">Select your city</option>
+                    </select> <!--load city will auto show the city for that state-->
+                    <small class="error-message" id="cityError"></small>
                 </div>
 
                 <div class="form-group">
@@ -313,13 +356,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
                 
                 
-                <div class="form-group">
-                    <label class="form-label">Address</label>
-                    <textarea name="address" class="form-control" rows="3" 
-                              placeholder="Enter your full address" required><?= htmlspecialchars($address) ?></textarea>
-                    <small class="password-hint">Please provide complete address for delivery</small>
-                    <small class="error-message" id="addressError"></small>
-                </div>
 
                 <div class="form-group">
                     <label class="form-label">Security Question</label>
@@ -351,6 +387,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
                 <button type="submit" class="btn-register" id="submitBtn">Create Account</button>
+            <a href="home.php" class="cancel-btn">Cancel</a>  
             </form>
 
             <div class="auth-link">
@@ -360,7 +397,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     </section>
 
     <?php include_once 'includes/footer.php'; ?>
-    
+
+    <script>
+    const cityByState=<?php echo json_encode($city_by_state); ?>;
+    const selectedCity=<?php echo json_encode($city); ?>;
+    </script>
+
     <script src="js/register_validation.js"></script>
 </body>
 </html>
