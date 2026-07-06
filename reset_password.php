@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once 'includes/config.php';
+require_once 'includes/send_mail.php';
 
 if (!isset($_SESSION['reset_user'])) {
     echo "<script>alert('Session expired. Please try again.'); window.location.href='login.php';</script>";
@@ -36,6 +37,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $stmt->bind_param("ss", $hash, $email);
     
     if ($stmt->execute()) {
+        //send mail
+        $reset_time=date('F j, Y, g:i:s A'); //set the format 
+        $subject="Your password was reset";
+        $body="<p>This email is to confirm that your HomeNest account password was changed at {$reset_time}. </p>
+        <p>If you have not recently changed your password or believe you have been sent this message in error, please contact our support team immediately.</p>
+        <p>Thank you.</p>
+        <p>HomeNest Team</p>";
+        $mail_result=sendOrderEmail($email, $subject, $body);
+        if($mail_result !== true){
+            error_log("Password reset confirmation email failed for order #{$email}: " . $mail_result);
+        }
+
         session_destroy();
         echo "<script>
             alert('Password updated successfully! You can now login with your new password.');
@@ -55,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Reset Password - Ikea4U</title>
+    <title>Reset Password - HomeNest</title>
     <link rel="stylesheet" href="css/template.css">
     <link rel="stylesheet" href="css/forgot_password.css">
 </head>
@@ -69,10 +82,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <p>Set your new password</p>
             </div>
             
-            <form action="reset_password.php" method="POST" class="login-form">
+            <form action="reset_password.php" method="POST" class="login-form" id="resetForm">
                 <div class="form-group">
                     <label>New Password</label>
                     <input type="password" id="new_password" name="new_password" class="form-control" required>
+                    <small class="error-message" id="passwordError"></small>
                         <div class="password-hint">
                         Password must be at least 8 characters with:
                         <ul style="margin: 5px 0 0 20px;">
@@ -87,9 +101,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <div class="form-group">
                     <label>Confirm Password</label>
                     <input type="password" id="confirm_password" name="confirm_password" class="form-control" required>
+                    <small class="error-message" id="confirmPasswordError"></small>
                 </div>
 
-                <button type="submit" class="btn-login">Update Password</button>
+                <button type="submit" id="submitBtn" class="btn-login">Update Password</button>
                 
                 <div class="auth-link">
                     <p><a href="login.php">Back to Login</a></p>
