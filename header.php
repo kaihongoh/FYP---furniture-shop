@@ -11,18 +11,21 @@ if ($category_result) {
         $categories[] = $cat;
     }
 }
+$current_category=isset($_GET['category']) ? (int)$_GET['category'] : 0;
+
+
 ?>
     <header>
       <div class="header-container">
         <a href="home.php">
           <img
             class="logo"
-            src="image\Ikea4U-logo (1).png"
-            alt="Ikea4U logo"
+            src="image\logo.jpeg"
+            alt="HomeNest logo"
           />
         </a>
         <div class="search-container">
-          <form id="searchForm" action="catalogue.php" method="GET">
+          <form id="searchForm" action="product.php" method="GET">
             <input
               type="text"
               name="search"
@@ -41,7 +44,7 @@ if ($category_result) {
             <!-- user already login/register-->
           <a href="shopping_cart.php">Shopping Cart</a>
           <a href="order_history.php">Order History</a>
-          <a href="profile.php">Profile</a>
+          <a href="user_profile.php">Profile</a>
           <a href="logout.php">Log Out</a>
           <?php else: ?>
             <!-- user not login/register -->
@@ -52,77 +55,35 @@ if ($category_result) {
 
       </div>
 
+
+
+
       <nav class="navbar">
         <ul class="nav-links">
+          <li>
+            <a href="product.php"
+            class="category-link <?=($current_category==0 && !isset($_GET['popular'])) ? 'active' : '' ?>">
+              All Products
+            </a>
+          </li>
+          <li>
+            <a href="popular.php?popular=1"
+            class="category-link <?= isset($_GET['popular']) ? 'active' : '' ?>">
+              👑 Popular Products
+            </a>
+          </li>
+
           <?php if (!empty($categories)): ?>
                 <?php foreach ($categories as $category): ?>
-                    <li>
+                      <li>
                         <a 
                             href="product.php?category=<?= htmlspecialchars($category['Category_ID']) ?>" 
-                            class="category-link"
-                        >
-                            <?php echo htmlspecialchars($category['Category_Name']); ?>
+                            class="category-link <?= $current_category == $category['Category_ID'] ? 'active' : '' ?>">
+                            <?= htmlspecialchars($category['Category_Name']); ?>
                         </a>
                     </li>
                 <?php endforeach; ?>
-            <?php else: ?>
-              <li>
-                <a
-                  href="catalogue.php?category=1"
-                  class="category-link"
-                >
-                  Armchairs
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=2"
-                  class="category-link"
-                >
-                  Sofas
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=3"
-                  class="category-link"
-                >
-                  Storage Boxes & Baskets
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=4"
-                  class="category-link"
-                >
-                  Beds & Mattresses
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=5"
-                  class="category-link"
-                >
-                  Kitchen Cabinets
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=6"
-                  class="category-link"
-                >
-                  Laundry & Cleaning
-                </a>
-              </li>
-              <li>
-                <a
-                  href="catalogue.php?category=7"
-                  class="category-link"
-                >
-                  Home Decoration
-                </a>
-              </li>
-            <?php endif; ?>
+                <?php endif; ?>
             </ul>
           </nav>
         </header>
