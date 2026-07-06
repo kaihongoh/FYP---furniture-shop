@@ -18,7 +18,7 @@ try{
     $mail->Port = 587;
 
     //sender 
-    $mail->setFrom('james5@gmail.com','HomeNest Support');
+    $mail->setFrom('james@gmail.com','HomeNest Support');
     $mail->addReplyTo('noreply@homenest.com','No-Reply');
     //receiver
     $mail->addAddress($to);
