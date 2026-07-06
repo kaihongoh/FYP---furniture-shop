@@ -1,7 +1,8 @@
 <?php
 session_start();
-require_once("includes/config.php");
-require_once 'includes/send_mail.php';
+require_once(__DIR__ . "/../includes/config.php");
+require_once(__DIR__ . "/../includes/send_mail.php");
+require_once(__DIR__ . "/../includes/update_level.php");
 
 if($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: manage_order.php");
@@ -12,32 +13,32 @@ if (!isset($_POST['order_id']) || !isset($_POST['status'])) {
     header("Location: manage_order.php");
     exit();
 }
-
+/*
 if(!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
     header("Location: admin_login.php");
     exit();
 }
-
+*/ 
 $order_id=(int)$_POST['order_id'];
 $new_status=$_POST['status'];
 
-$allow_status=['Pending', 'Paid', 'Processing', 'Shipped', 'Delivered', 'Completed', 'Cancelled'];
+$allow_status=['Pending', 'Paid', 'Processing', 'Shipped', 'Completed', 'Refund_Requested', 'Partially_Refunded', 'Fully_Refunded'];
 if(!in_array($new_status, $allow_status)) {
-    $_SESSION['error']="Invalid status.";
+    $_SESSION['message']="There are some error. Please try again later.";
     header("Location: manage_order.php");
     exit();
     }
 
 //get order
-$stmt=$conn->prepare('SELECT Order_Number, Customer_Email, Order_Status
+$getOrder=$conn->prepare('SELECT Order_Number, Customer_Email, Order_Status, User_ID, Subtotal, Discount_Amount, Shipping_Fee, Tax_Amount, Total_Amount
 FROM orders
 WHERE Order_ID=?');
-$stmt->bind_param('i', $order_id);
-$stmt->execute();
-$order=$stmt->get_result()->fetch_assoc();
+$getOrder->bind_param('i', $order_id);
+$getOrder->execute();
+$order=$getOrder->get_result()->fetch_assoc();
 
 if(!$order) {
-    $_SESSION['error']="Order not found.";
+    $_SESSION['message']="Order not found.";
     header("Location: manage_order.php");
     exit();
 }
@@ -46,32 +47,51 @@ $old_status=$order["Order_Status"];
 
 //cannot change from completed to shipped
 if($old_status === $new_status) {
-    $_SESSION["info"]= "Status change failed.";
+    $_SESSION["message"]= "Status change failed.";
     header("Location: manage_order.php");
     exit();
     }
 
-
-$allow_transition=['Paid'=>['Processing'],
+//follow the flow
+$allow_transition=[
+'Pending'=>['Paid'],
+'Paid'=>['Processing'],
 'Processing'=>['Shipped'],
-'Shipped'=>['Delivered'],
-'Delivered'=>['Completed'],
-'Completed'=>[],
-'Cancelled'=>[]];    
+'Shipped'=>['Completed'],
+'Completed'=>['Refund_Requested'],
+'Refund_Requested'=>['Partially_Refunded', 'Fully_Refunded'],
+'Partially_Refunded'=>['Fully_Refunded'],
+'Fully_Refunded'=>[]];
 
 if(!isset($allow_transition[$old_status]) || !in_array($new_status, $allow_transition[$old_status])) {
-    $_SESSION['error']= 'Invalid status transition. Please try again.';
+    $_SESSION['message']= 'Invalid status transition. Please follow the workflow.';
     header("Location: manage_order.php");
     exit();   
+}
+
+if($new_status === 'Completed') {
+    $actual_paid=$order['Subtotal']-$order['Discount_Amount'];
+
+    $check=$conn->prepare("SELECT Actual_Delivery_Date FROM orders WHERE Order_ID=?");
+    $check->bind_param("i", $order_id);
+    $check->execute();
+    $result=$check->get_result()->fetch_assoc();
+
+    if(empty($result['Actual_Delivery_Date'])) {
+        $_SESSION['message']= "Please update actual delivery date before update order status to completed.";
+        header("Location: manage_order.php");
+        exit();
+    }   
+    updateSpend($conn, $order['User_ID'], $actual_paid); //update total spent and level (not include discount, shipping fee and tax)
 }
 
 //update status
 $update=$conn->prepare("UPDATE orders SET Order_Status=? WHERE Order_ID=?");
 $update->bind_param("si", $new_status, $order_id);
 if($update->execute()) {
-    $_SESSION['success']="Order status updated to $new_status successfully.";
+    $_SESSION['message']="Order status updated to $new_status successfully.";
 
-    if($new_status === 'Shipped' || $new_status === 'Delivered' || $new_status === 'Completed') {
+    if($new_status === 'Shipped' || $new_status === 'Completed') {
         //get order info (email)
         $stmt_order=$conn->prepare("SELECT * FROM orders WHERE Order_ID=?");
         $stmt_order->bind_param("i", $order_id);
@@ -88,14 +108,13 @@ if($update->execute()) {
 
         $items_html="";
         while($item=$items_result->fetch_assoc()) {
-            $img_src='uploads/'.htmlspecialchars($item["Product_Picture"]);
+            $img_src=htmlspecialchars($item["Product_Picture"]);
             $items_html .="
             <tr>
             <td>
-            <img src='" . $img_src . "' width='50' height='50' style='object-fit:cover;'>
             ". htmlspecialchars($item["Product_Name"]) . "
             </td>
-            <td>Color: ". htmlspecialchars($item["Variant_Color"]) ."</td>
+            <td>". htmlspecialchars($item["Variant_Color"]) ."</td>
             <td>" . $item["Quantity"] . "</td>
             <td>RM ". number_format($item["Price"],2) . "</td>
             <td>RM ". number_format($item["Price"] * $item['Quantity'],2) . "</td>
