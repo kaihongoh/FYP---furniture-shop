@@ -1,39 +1,25 @@
 <?php
 session_start();
 require_once 'includes/config.php';
+header('Content-Type: application/json');
 
 if(!isset($_GET['id']) || !isset($_GET['action'])) {
-    header("Location: shopping_cart.php");
+    echo json_encode(['success' => false, 'message' => 'Session expired. Please try again.']);
     exit();
 }
+
 
 $id = (int)$_GET['id'];
 $action = $_GET['action'];
+$is_logged_in=isset($_SESSION['user_id']);
 
 if(!in_array($action, ['increase', 'decrease'])) {
-    header("Location: shopping_cart.php");
+    echo json_encode(['success' => false, 'message' => 'Invalid action.']);
     exit();
 }
 
-if(isset($_SESSION['user_id'])) {
-    //logged in user, update cart item in database
+if($is_logged_in) {
     $user_id = $_SESSION['user_id'];
-    $cart=$conn->prepare("SELECT cart.Quantity, product_variant.Stock 
-    FROM cart 
-    JOIN product_variant ON cart.Variant_ID = product_variant.Variant_ID
-    WHERE cart.Cart_ID = ? AND cart.User_ID = ?");
-    $cart->bind_param("ii", $id, $user_id);
-    $cart->execute();
-    $item=$cart->get_result()->fetch_assoc();
-
-    if(!$item) {
-        header("Location: shopping_cart.php");
-        exit();
-    }
-
-
-
-//use atomic update to prevent race condition, can make sure quantity not exceed available stock
     if($action === 'increase') {
         $update=$conn->prepare("UPDATE cart 
         SET Quantity = Quantity + 1 
@@ -43,68 +29,73 @@ if(isset($_SESSION['user_id'])) {
         $update->bind_param("ii", $id, $user_id);
         $update->execute();
 
-        //if no enough stock or inactive
         if($update->affected_rows === 0) {
-            $check=$conn->prepare("SELECT product_variant.Stock
-            FROM cart
-            JOIN product_variant 
-            ON cart.Variant_ID = product_variant.Variant_ID
-            WHERE cart.Cart_ID=? AND cart.User_ID=?");
-            $check->bind_param("ii", $id, $user_id);
-            $check->execute();
-            $item=$check->get_result()->fetch_assoc();
-
-            if(!$item) {
-                $_SESSION['error'] = "Item not found in cart.";
-                header("Location: shopping_cart.php");
-                exit();
-            } else {
-                $_SESSION['error'] = "Sorry. Only {$item['Stock']} items are available in stock.";
-                header("Location: shopping_cart.php");
-                exit();
-            }
+            echo json_encode(["success"=> false,"message"=> "Out of stock"]);
+            exit();
         }
-    } 
-    else if($action === 'decrease') { //only decrease when quantity >1
-        $update=$conn->prepare("UPDATE cart SET Quantity = Quantity-1 WHERE Cart_ID = ? AND User_ID = ? AND Quantity > 1");
-        $update->bind_param("ii", $id, $user_id);
-        $update->execute();
+    } else  if($action === 'decrease') {
+        $check=$conn->prepare("SELECT Quantity FROM cart WHERE Cart_ID = ? AND User_ID = ?");
+        $check->bind_param("ii", $id, $user_id);
+        $check->execute();
+        $quantity=$check->get_result()->fetch_assoc();
+        $qty=$quantity['Quantity'];
+
+        if($qty == 1) {
+            $del=$conn->prepare("DELETE FROM cart WHERE Cart_ID = ? AND User_ID = ?");
+            $del->bind_param("ii", $id, $user_id);
+            $del->execute();
+            echo json_encode(['success'=> true,'deleted'=> true]);
+            exit();        
+        } else {
+            //only decrease when quantity >1
+            $update=$conn->prepare("UPDATE cart SET Quantity = Quantity-1 WHERE Cart_ID = ? AND User_ID = ? AND Quantity > 1");
+            $update->bind_param("ii", $id, $user_id);
+            $update->execute();
+        }
     }
-//guest user
+    $new_quantity=$conn->prepare("SELECT Quantity FROM cart WHERE Cart_ID = ? AND User_ID = ?");
+    $new_quantity->bind_param("ii", $id, $user_id);
+    $new_quantity->execute();
+    $new_qty=$new_quantity->get_result()->fetch_assoc();
+    if($new_qty) {
+        echo json_encode(['success'=> true,'new_quantity'=> $new_qty['Quantity']]);
+    } else {
+        echo json_encode(['success'=> true,'deleted'=> true]);
+    }
+    exit();
 } else {
+    //guest user, update cart item in session
     if(!isset($_SESSION['cart'][$id])) {
-        header("Location: shopping_cart.php");
+        echo json_encode(['success' => false, 'message' => 'Item not found in cart.']);
         exit();
-    }
-
-        $qty=$_SESSION['cart'][$id]['quantity'];
-
+    }   
+    $current_qty=$_SESSION['cart'][$id]['quantity'];    
+    if($action === 'increase') {
         $stock_query = $conn->prepare("SELECT Stock FROM product_variant WHERE Variant_ID = ?");
         $stock_query->bind_param("i", $id);
         $stock_query->execute();
         $stock_result=$stock_query->get_result()->fetch_assoc();
-
-        if(!$stock_result) {
-            $_SESSION['error'] = "Item not found in cart.";
-            header("Location: shopping_cart.php");
-            exit();
-        }
         $stock=$stock_result['Stock'];
 
-        if($action === 'increase') {
-            if($qty >= $stock) {
-                $_SESSION['error'] = "Sorry. Only $stock items are available in stock.";
-                header("Location: shopping_cart.php");
-                exit();
-            }
-            $_SESSION['cart'][$id]['quantity']++;
-        } else if($action === 'decrease' && $qty > 1) {
+        if($current_qty >= $stock) {
+            echo json_encode(['success' => false, 'message' => "Sorry. Only $stock items are available in stock."]);
+            exit();
+        }
+        $_SESSION['cart'][$id]['quantity']++;
+    } else if($action === 'decrease') {
+        if($current_qty == 1) {
+            unset($_SESSION['cart'][$id]);
+            echo json_encode(['success'=> true, 'deleted'=>true]);
+            exit();
+        } else {
             $_SESSION['cart'][$id]['quantity']--;
         }
     }
+    echo json_encode(['success'=> true,'new_quantity'=>$_SESSION['cart'][$id]['quantity'] ?? 0]);
+    exit();
+}
+?>
 
-header("Location: shopping_cart.php");
-exit();
 
 
 
