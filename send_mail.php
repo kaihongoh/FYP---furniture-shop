@@ -12,13 +12,13 @@ try{
     $mail->IsSMTP();
     $mail->Host = "smtp.gmail.com";
     $mail->SMTPAuth = true;
-    $mail->Username = 'kaihongoh5@gmail.com';
+    $mail->Username = 'james@gmail.com';
     $mail->Password = 'vfsw hkwh ukgh dkdm';
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
     $mail->Port = 587;
 
     //sender 
-    $mail->setFrom('kaihongoh5@gmail.com','HomeNest Support');
+    $mail->setFrom('james5@gmail.com','HomeNest Support');
     $mail->addReplyTo('noreply@homenest.com','No-Reply');
     //receiver
     $mail->addAddress($to);
