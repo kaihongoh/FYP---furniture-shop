@@ -5,11 +5,12 @@ session_start();
 $username = $_SESSION['user_name'] ?? 'Guest';
 
 //clear the data
-$_SESSION = array();
+//$_SESSION = array();
 
 //destroy the session
-session_destroy();
-
+//session_destroy();
+unset($_SESSION['user_id']);
+unset($_SESSION['user_name']);
 //logout message
 session_start();
 $_SESSION['logout_message'] = "Goodbye, $username! You have been logged out.";
