@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 $user_id=$_SESSION['user_id'];
 $address_id=isset($_GET["id"]) ? (int)$_GET["id"] : 0;
 
-if($address_id> 0) {
+if($address_id<= 0) {
     $_SESSION['error'] = "Invalid address id";
     header("Location: address_list.php");
     exit();
@@ -22,7 +22,7 @@ $stmt->bind_param("ii", $address_id, $user_id);
 $stmt->execute();
 $result = $stmt->get_result();
 
-if($result->num_rows > 0) {
+if($result->num_rows == 0) {
     $_SESSION["error"] = "Address not found.";
     header("Location: address_list.php");
     exit();
@@ -48,3 +48,6 @@ try{
 
 header("Location: address_list.php");
 exit();
+
+
+
