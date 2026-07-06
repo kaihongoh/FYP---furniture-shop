@@ -8,7 +8,7 @@ if($variant_id<=0) {
     header("Location: product.php");
     exit();
 }
-$quantity = isset($_GET['quantity']) ? (int)$_GET['quantity'] : 1; // default quantity to 1 if not provided
+$quantity = isset($_GET['quantity']) ? $_GET['quantity'] : 1; // default quantity to 1 if not provided
 
 $stmt=$conn->prepare("SELECT product_variant.*,
 product.Product_Name, 
@@ -29,15 +29,16 @@ if(!$product) {
 $stock = $product['Stock'];
 
 //validation quantity
-if($quantity < 1) {
+if(!preg_match('/^\d+$/', $quantity) || (int)$quantity < 1) {
     $_SESSION['error'] = "Quantity must be at least 1.";
-    header("Location: product.php?product_id=" . $product['Product_ID']);
-    exit();
+    header("Location: product_details.php?id=" . $product['Product_ID']);
+    exit(); 
 }
+$quantity=(int)$quantity;
 
 if ($quantity > $stock) {
     $_SESSION['error'] = "Sorry. Only $stock items are available in stock.";
-    header("Location: product.php?product_id=" . $product['Product_ID']);
+    header("Location:product_details.php?id=" . $product['Product_ID']);
     exit();
 }
 $quantity = max(1, min($quantity, $stock)); // let quantity at least 1 
@@ -56,7 +57,7 @@ if(isset($_SESSION['user_id'])) {
 
         if($new_total > $stock) {
             $_SESSION['error'] = "You have {$existing_item['Quantity']} in cart. Only $stock items are available in stock.";
-            header("Location: product.php?product_id=" . $product['Product_ID']);
+            header("Location: shopping_cart.php");
             exit();
         }
         
@@ -84,18 +85,24 @@ if(isset($_SESSION['user_id'])) {
 
     if($new_total > $stock) {
         $_SESSION['error'] = "You have {$current_qty} in cart. Only $stock items are available in stock.";
-        header("Location: product.php?product_id=" . $product['Product_ID']);
+        header("Location: shopping_cart.php");
         exit();
     } else {
         // Add new product to cart
+            $final_picture="";
+            if(!empty($product['Variant_Image'])) {
+                    $final_picture='uploads/variants/' . $product['Variant_Image'];
+                } else {
+                    $final_picture='uploads/products/' . $product['Product_Picture'];
+                }
         $_SESSION['cart'][$variant_id] = [
             'variant_id' => $variant_id,
             'name' => $product['Product_Name'],
             'price' => $product['Price'],
-            'picture' => !empty($product['Variant_Image']) ? $product['Variant_Image'] : $product['Product_Picture'],
+            'picture' => $final_picture,
             'description' => $product['Product_Description'],
             'color' => $product['Color'],
-            'quantity' => $new_total //user new total or quantity?
+            'quantity' => $new_total 
         ];
         $_SESSION['success'] = "Item is added to cart.";
     }
