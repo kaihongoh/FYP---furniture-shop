@@ -1,0 +1,179 @@
+/* Main Container */
+.about-page {
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    background-color: var(--body-bgcolor);
+}
+
+/* About Header */
+.about-header {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.about-header h2 {
+    color: var(--primary-color);
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.about-header p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Mission Section */
+.mission-section {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.mission-section h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 600;
+}
+
+.mission-content {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+}
+
+.mission-item {
+    flex: 1;
+    min-width: 300px;
+    background-color: var(--light-green);
+    padding: 25px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.mission-item h3 {
+    color: var(--primary-color);
+    font-size: 1.3rem;
+    margin-bottom: 15px;
+}
+
+.mission-item p {
+    color: #555;
+    line-height: 1.6;
+}
+
+/* Team Info */
+.team-info {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.team-info h2 {
+    color: var(--primary-color);
+    font-size: 2rem;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+.team-info p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+/* Member Cards */
+.member-card {
+    background-color: white;
+    padding: 20px;
+    border-radius: 10px;
+    margin-bottom: 40px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: flex-start;
+}
+
+/* image at left side */
+.member-card img {
+    width: 250px;           
+    height: 250px;          
+    border-radius: 10px;
+    object-fit: cover;      /*remain the picture size, cut the extra size*/
+    border: 3px solid var(--light-green);
+    margin-right: 30px;     
+    flex-shrink: 0;         
+}
+
+/*member info at right side */
+.member-info {
+    flex: 1;                
+}
+
+.member-name {
+    color: var(--primary-color);
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.member-role {
+    color: var(--secondary-color);
+    font-size: 1.1rem;
+    margin-bottom: 20px;
+    font-weight: 500;
+}
+
+.member-bio {
+    color: #555;
+    line-height: 1.7;
+    margin-bottom: 25px;
+    font-size: 1rem;
+}
+
+.member-contact {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.contact-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    color: #555;
+    font-size: 0.95rem;
+}
+
+.contact-item i {
+    font-style: normal;
+    margin-right: 10px;
+    color: var(--primary-color);
+    font-weight: 500;
+}
+
+
+/*contact section */
+.contact-section {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}

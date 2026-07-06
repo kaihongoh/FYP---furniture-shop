@@ -1,0 +1,126 @@
+/*main form container*/
+.product-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid #eaeaea;
+}
+/*spacing between form fields*/
+.product-form .form-group {
+    margin-bottom: 1.75rem;
+}
+/*instruction of file size*/ 
+.product-form .form-group .form-text{
+    color: #666;
+    font-size: 13px;
+    display: block;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+/*last form group*/
+.product-form .form-group:last-child {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.product-form label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.product-form .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #4a5568;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.product-form .form-control:focus {
+    border-color: #4299e1;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.product-form textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+/* File Input Customization */
+.product-form input[type="file"] {
+    padding: 0.5rem;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    width: 100%;
+}
+
+.product-form input[type="file"]::file-selector-button {
+    padding: 0.5rem 1rem;
+    background-color: #edf2f7;
+    border: 1px solid #e2e8f0;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 1rem;
+    transition: all 0.3s ease;
+}
+
+.product-form input[type="file"]::file-selector-button:hover {
+    background-color: #e2e8f0;
+}
+
+/* Image Preview */
+#imagePreview {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+#imagePreview img {
+    max-width: 200px;
+    max-height: 200px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+
+/* required field */
+.required:after {
+    content: " *";
+    color: #e53e3e;
+}
+
+/* inline error message */
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+}
+
+.form-control.error,
+select.error {
+    border-color: #dc3545;
+}
+
+
+

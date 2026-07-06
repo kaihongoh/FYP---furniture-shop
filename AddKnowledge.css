@@ -1,0 +1,108 @@
+/*main form container*/
+.knowledge-form {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid #eaeaea;
+}
+/*spacing between form fields*/
+.knowledge-form .form-group {
+    margin-bottom: 1.75rem;
+}
+/*instruction of file size*/ 
+.knowledge-form .form-group .form-text{
+    color: #666;
+    font-size: 13px;
+    display: block;
+    margin-top: 6px;
+    line-height: 1.4;
+}
+/*last form group*/
+.knowledge-form .form-group:last-child {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+.knowledge-form label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.knowledge-form .form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #4a5568;
+    background-color: #fff;
+    background-clip: padding-box;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+.knowledge-form .form-control:focus {
+    border-color: #4299e1;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+.knowledge-form textarea.form-control {
+    min-height: 120px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+
+/* required field */
+.required:after {
+    content: " *";
+    color: #e53e3e;
+}
+
+/* inline error message */
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+}
+
+.form-control.error,
+select.error {
+    border-color: #dc3545;
+}
+
+.info-box {
+    margin-bottom: 1.75rem;
+}
+
+.info-box label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+.info-box .info-content {
+    padding: 0.75rem 1rem;
+    background-color: #f8f9fa;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    color: #4a5568;
+    line-height: 1.5;
+    word-wrap: break-word;
+}
+

@@ -1,0 +1,94 @@
+        .hero {
+            position:relative;
+            padding: 80px 20px;
+            background: #f7f9f7;
+            text-align: center;
+            background-image: url('../image/ikea_shopping_background.png');
+            background-size: cover; 
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.35); /*darkness*/
+            z-index: 1;
+        }
+
+        .hero h1 {
+            color: #fff;
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+        }
+
+        .hero p {
+            color: #fff;
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto 30px;
+        }
+
+        .hero a {
+            padding: 14px 32px;
+            background: #2a5a3c;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .hero h1,
+        .hero p,
+        .hero a {
+            position: relative;
+            z-index: 2;
+        }
+
+        .features {
+            padding: 50px 20px;
+            background: #fff;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 25px;
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        .feature-box {
+            background: #f9f9f9;
+            padding: 25px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        /* Popup styles */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .popup {
+            background: #fff;
+            padding: 30px 40px;
+            border-radius: 12px;
+            text-align: center;
+            animation: fadeIn 0.4s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }

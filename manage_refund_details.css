@@ -1,0 +1,140 @@
+.refund-form-container {
+    background-color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    max-width: 800px;
+    margin: 0 auto;
+    border: 1px solid #eaeaea;
+}
+
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: 100%;
+    margin-bottom: 1.75rem;
+}
+
+
+.form-group label,
+.form-group .form-label {
+    display: block;
+    margin-bottom: 0.6rem;
+    font-weight: 600;
+    color: #2d3748;
+    font-size: 0.95rem;
+}
+
+
+.form-group div {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #4a5568;
+    background-color: #f8fafc;
+    border: 1px solid #edf2f7;
+    border-radius: 6px;
+    min-height: 45px;
+}
+
+
+.refund-image {
+    max-width: 100%;
+    width: 250px;
+    height: auto;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+    background: #fff;
+    padding: 4px;
+}
+
+
+select.form-control,
+.form-group select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    color: #4a5568;
+    background-color: #fff;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    transition: all 0.3s ease;
+}
+
+select.form-control:focus {
+    border-color: #4299e1;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+
+textarea.form-control {
+    width: 100%;
+    min-height: 120px;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    line-height: 1.6;
+    color: #4a5568;
+    border: 1px solid #e2e8f0;
+    border-radius: 6px;
+    resize: vertical;
+}
+
+textarea.form-control:focus {
+    border-color: #4299e1;
+    outline: 0;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.2);
+}
+
+
+form .form-group:last-child {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    display: flex;
+    flex-direction: row; 
+    gap: 15px;
+    margin-bottom: 0;
+}
+
+
+form button[type="submit"] {
+    display: inline-block;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+    text-align: center;
+}
+
+form button[type="submit"]:hover {
+    transform: translateY(-2px);
+}
+
+
+button[value="approve"] {
+    box-shadow: 0 4px 8px rgba(40, 167, 69, 0.2) !important;
+}
+
+button[value="reject"] {
+    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.2) !important;
+}
+
+
+
+.form-control.error {
+    border-color: #dc3545;
+    background-color: #fff8f8;
+}
+
+.error-message {
+    color: #dc3545;
+    font-size: 12px;
+    display: none;
+    margin-top: 5px;
+}

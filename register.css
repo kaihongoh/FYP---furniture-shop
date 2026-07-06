@@ -1,0 +1,179 @@
+/* register page container */
+.register-page {
+    min-height: calc(100vh - 140px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 20px;
+}
+
+.register-container {
+    width: 100%;
+    max-width: 500px;
+    background: var(--form-bg);
+    border-radius: 15px;
+    box-shadow: var(--shadow);
+    padding: 40px;
+    margin: auto;
+}
+
+/*title style*/
+.register-title {
+    font-size: 2.2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+    text-align: center;
+    font-weight: 600;
+}
+
+.form-subtitle {
+    text-align: center;
+    color: var(--text-light);
+    margin-bottom: 30px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+/*form format*/
+.register-page .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #444;
+    font-size: 16px;
+}
+
+/*drop down style*/
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23212529' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 12px;
+    padding-right: 40px;
+}
+
+/*text area style*/
+textarea.form-control {
+    min-height: 100px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+/*password hint */
+.password-hint {
+    font-size: 13px;
+    color: var(--text-light);
+    margin-top: 8px;
+    line-height: 1.5;
+    display: block;
+}
+/* inline error message */
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+}
+
+.form-control.error,
+select.error {
+    border-color: #dc3545;
+}
+
+/* terms and conditions */
+.terms {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    border: 1px solid #eee;
+    text-align: left;
+}
+
+.terms label {
+    font-size: 14px;
+    display: flex;
+    align-items: flex-start;
+    color: #555;
+    line-height: 1.5;
+    cursor: pointer;
+    margin: 0;
+}
+
+.terms input[type="checkbox"] {
+    margin-right: 12px;
+    margin-top: 3px;
+    cursor: pointer;
+    width: 18px;
+    height: 18px;
+}
+
+.terms a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    margin: 0 4px;
+}
+
+.terms a:hover {
+    text-decoration: underline;
+}
+
+/*other button register will in template  */
+
+.btn-register:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+}
+
+/*link pattern*/
+.auth-link {
+    text-align: center;
+    margin-top: 25px;
+    font-size: 15px;
+    color: var(--text-light);
+    padding-top: 20px;
+    border-top: 1px solid var(--border-color);
+    line-height: 1.6;
+}
+
+.auth-link a {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    margin-left: 5px;
+}
+
+.auth-link a:hover {
+    text-decoration: underline;
+}
+
+/* alert message */
+.alert {
+    padding: 12px 15px;
+    border-radius: 6px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: var(--error-color);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: var(--success-color);
+}

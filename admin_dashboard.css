@@ -1,0 +1,31 @@
+.main-content {
+    margin-left: 250px;
+    padding: 25px;
+    min-height: 100vh;
+    background-color: #f8f9fa;
+}
+
+.dashboard-cards .card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.dashboard-cards .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+}
+
+.chart-container {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    margin-bottom: 20px;
+}
+
+.card-icon {
+    font-size: 2rem;
+    margin-bottom: 15px;
+}

@@ -1,0 +1,236 @@
+/* Action Bar */
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* Search and Filters */
+.search-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px 0;
+    align-items: flex-end;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    min-width: 180px;
+}
+
+.filter-group label {
+    margin-bottom: 8px;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.filter-group select {
+    padding: 10px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+/* Empty State */
+.no-user-found {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.no-user-found h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.no-user-found p {
+    color: #6c757d;
+    margin-bottom: 25px;
+}
+
+/* order table */
+
+.order-table-container{
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    margin-top: 20px;
+}
+
+.order-table{
+    width: 100%;
+    min-width:1200px;
+    border-collapse: collapse;
+}
+
+.order-table th{
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 14px;
+    text-align: center;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.order-table td{
+    padding: 16px 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+    white-space:nowrap;
+    line-height:1.4;
+}
+
+.order-table tr:hover{
+    background-color: #f8f9fa;
+}
+
+.order-table form{
+    margin: 0;
+    display:flex;
+    align-items:center;
+    gap:10px;
+}
+
+.order-table .btn{
+    min-width: 90px;
+}
+
+.order-table select{
+    padding:8px 10px;
+    border:1px solid #ced4da;
+    border-radius:6px;
+    min-width:170px;
+    font-size:14px;
+    background-color:white;
+}
+
+.order-table td:nth-child(4),
+.order-table th:nth-child(4){
+    min-width:320px;
+}
+
+.order-table td:nth-child(3){
+    font-weight:600;
+    color:#198754;
+}
+
+.modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px 40px;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: #fff;
+    margin-top:28vh;
+    width: 100%;
+    max-width: 620px;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    padding: 30px 35px;
+    animation: modalPop 0.2s ease-out;
+}
+
+/* Title */
+.modal-content h2 {
+    margin: 0 0 20px;
+    font-size: 22px;
+    font-weight: 600;
+    color: #333;
+    border-bottom: 2px solid #28a745;
+    padding-bottom: 12px;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 20px;
+}
+ 
+
+/* Form spacing */
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: #495057;
+    font-size: 14px;
+}
+
+/* Inputs */
+.form-control,
+.form-group input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 14px;
+    transition: 0.2s;
+}
+
+.form-control:focus,
+.form-group input:focus {
+    border-color: #28a745;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.15);
+}
+
+/* Disabled input */
+.form-control:disabled {
+    background: #f5f5f5;
+    color: #777;
+    cursor: not-allowed;
+}
+
+/* Hint text */
+.hint {
+    font-size: 13px;
+    color: #6c757d;
+    margin-top: 6px;
+}
+
+/* inline error message */
+.error-message {
+    color: #dc3545;
+    font-size: 13px;
+    margin-top: 6px;
+    display: none;
+}
+
+.form-control.error,
+select.error {
+    border-color: #dc3545;
+}

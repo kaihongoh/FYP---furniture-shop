@@ -1,0 +1,143 @@
+.login-page {
+    min-height: calc(100vh - 200px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px 20px;
+}
+
+.login-container {
+    display: flex;
+    max-width: 900px;
+    width: 100%;
+    background: #fff;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,.15);
+}
+
+/* ===== Left Description ===== */
+.login-welcome {
+    flex: 1;
+    background-color: var(--primary-color);
+    color: #fff;
+    padding: 40px;
+}
+
+.login-welcome h2 {
+    font-size: 28px;
+    margin-bottom: 20px;
+}
+
+.login-welcome p {
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 20px;
+}
+
+.login-welcome ul {
+    list-style: none;
+    padding: 0;
+    margin:0;
+}
+
+.login-welcome ul li {
+    color:white;
+    margin:12px 0;
+    padding:15px;
+    background-color:rgb(172, 170, 170);
+    border-radius:12px;
+}
+
+/* ===== Right Form ===== */
+.login-form-container {
+    flex: 1;
+    padding: 40px;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.form-header h1 {
+    color: var(--primary-color);
+    font-size: 26px;
+}
+
+.login-page .form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-label {
+    font-size: 14px;
+    font-weight: 500;
+    margin-bottom: 6px;
+    display: block;
+}
+
+.login-page .form-control {
+    width: 100%;
+    padding: 12px;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+}
+
+.login-page .form-control:focus {
+    outline: none;
+    border-color: var(--primary-color);
+}
+
+/* ===== Eyeball ===== */
+.input-wrapper {
+    position: relative;
+    height:45px;
+}
+
+#eyeball {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.eye {
+    width: 14px;
+    height: 14px;
+    border: 2px solid #333;
+    border-radius: 50% 0;
+    transform: rotate(45deg);
+}
+
+/* ===== Button (will use back the template)===== */
+
+/* ===== Links ===== */
+.forgot-password {
+    text-align: right;
+    margin-top: 10px;
+}
+.forgot-password a {
+    font-size: 13px;
+    color: var(--primary-color);
+    text-decoration: none;
+}
+.forgot-password a:hover {
+    text-decoration: underline;
+}
+
+.register-link {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.register-link a,
+.forgot-password a {
+    color: var(--primary-color);
+    text-decoration: none;
+}
+
+

@@ -1,0 +1,249 @@
+/* ===== CONTAINER ===== */
+.container {
+    display:flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+/* ===== SIDEBAR ===== */
+.profile-wrapper {
+    flex-shrink: 0;
+}
+
+.profile-sidebar {
+    width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 20px 0;
+    position: sticky;
+    top: 120px;
+}
+
+.profile-sidebar .nav-link.active {
+    background-color: var(--light-green);
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+    font-weight:600;
+}
+
+.profile-sidebar .nav-link {
+    display: block;
+    padding: 14px 24px;
+    color: var(--body-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    border-left:3px solid transparent;
+    transition: color 0.2s ease;
+}
+
+.profile-sidebar .nav-link:hover {
+    background-color: var(--light-green);
+    border-left-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+.address_list-container {
+    width:100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+}
+
+/* ===== HEADER ===== */
+.form-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.address-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--body-color);
+    margin-bottom: 8px;
+}
+
+.form-subtitle {
+    color: var(--text-light);
+    font-size: 15px;
+    margin: 0;
+}
+
+/* ===== MESSAGES ===== */
+.success-message {
+    background-color: #d4edda;
+    border: 1px solid #c3e6cb;
+    color: #155724;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.error-message {
+    background-color: #f8d7da;
+    border: 1px solid #f5c6cb;
+    color: #721c24;
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+/* ===== ADD BUTTON ===== */
+.address-list > div:first-child {
+    margin-bottom: 25px;
+}
+
+.add-address-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--primary-color);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(42, 90, 60, 0.2);
+}
+
+.add-address-btn:hover {
+    background: var(--primary-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(42, 90, 60, 0.3);
+}
+
+/* ===== EMPTY STATE ===== */
+.empty-message {
+    text-align: center;
+    padding: 60px 20px;
+    background: #f8f9fa;
+    border-radius: 10px;
+    border: 2px dashed var(--border-color);
+}
+
+.empty-message p {
+    color: var(--text-light);
+    font-size: 16px;
+    margin: 0;
+}
+
+/* ===== ADDRESS CARD ===== */
+.address-info {
+    background: #fafafa;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 20px 24px;
+    margin-bottom: 0;
+    text-align: left;
+    transition: all 0.2s ease;
+}
+
+.address-info:hover {
+    border-color: var(--primary-color);
+    box-shadow: 0 2px 8px rgba(42, 90, 60, 0.1);
+}
+
+.address-info p {
+    margin: 0 0 10px 0;
+    color: var(--body-color);
+    line-height: 1.6;
+}
+
+.address-info p:last-child {
+    margin-bottom: 0;
+}
+
+.address-info strong {
+    font-size: 16px;
+    color: var(--body-color);
+}
+
+.address-info i {
+    color: var(--text-light);
+    font-style: normal;
+    font-size: 14px;
+}
+
+/* ===== BADGES ===== */
+.default {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+.address-label {
+    display: inline-block;
+    background: #e9ecef;
+    color: var(--text-light);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.address-action {
+    display: flex;
+    gap: 12px;
+    padding: 15px 24px;
+    background: white;
+    border: 1px solid var(--border-color);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 20px;
+}
+
+.edit-btn,
+.setDefault-btn {
+    padding: 8px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: white;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+}
+
+.setDefault-btn {
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+}
+
+.setDefault-btn:hover {
+    background: var(--light-green);
+}
+
+

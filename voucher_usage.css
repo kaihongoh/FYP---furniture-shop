@@ -1,0 +1,71 @@
+.action-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+/* not found */
+.no-usage-found {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 60px 20px;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.no-usage-found h3 {
+    color: #495057;
+    margin-bottom: 10px;
+}
+
+.no-usage-found p {
+    color: #6c757d;
+    margin-bottom: 25px;
+}
+
+/* USER TABLE */
+
+.usage-table-container{
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    overflow-x: auto;
+    margin-top: 20px;
+}
+
+.usage-table{
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.usage-table th{
+    background-color: #f8f9fa;
+    color: #495057;
+    padding: 14px;
+    text-align: left;
+    font-weight: 600;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.usage-table td{
+    padding: 14px;
+    border-bottom: 1px solid #eee;
+    vertical-align: middle;
+}
+
+.usage-table tr:hover{
+    background-color: #f8f9fa;
+}
+
+.usage-table form{
+    margin: 0;
+}
+
+.usage-table .btn{
+    width: 140px;
+}

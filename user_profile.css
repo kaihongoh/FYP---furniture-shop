@@ -1,0 +1,137 @@
+/* ===== LAYOUT ===== */
+.container {
+    display: flex;
+    max-width: 1200px;
+    margin: 40px auto;
+    padding: 0 20px;
+    gap: 30px;
+}
+
+/* ===== SIDEBAR ===== */
+.profile-wrapper {
+    flex-shrink: 0;
+}
+
+.profile-sidebar {
+    width: 220px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 20px 0;
+    position: sticky;
+    top: 120px;
+}
+
+.profile-sidebar .nav-link.active {
+    background-color: var(--light-green);
+    color: var(--primary-color);
+    border-left-color: var(--primary-color);
+    font-weight:600;
+}
+
+.profile-sidebar .nav-link {
+    display: block;
+    padding: 14px 24px;
+    color: var(--body-color);
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 15px;
+    border-left:3px solid transparent;
+    transition: color 0.2s ease;
+}
+
+.profile-sidebar .nav-link:hover {
+    background-color: var(--light-green);
+    border-left-color: var(--primary-color);
+    color: var(--primary-color);
+}
+
+/* ===== MAIN CONTENT ===== */
+.content {
+    flex: 1;
+    min-width: 0;
+}
+
+.profile-page {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+    padding: 40px;
+}
+
+.profile-container {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* ===== FORM STYLES ===== */
+.profile-form {
+    text-align: left;
+}
+
+.form-group {
+    margin-bottom: 24px;
+    position: relative;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: var(--body-color);
+    font-size: 14px;
+}
+
+/* ===== LEVEL BADGE ===== */
+.level-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    margin-top: 14px;
+}
+
+/* Adjust input to make room for badge */
+.form-group:first-of-type .form-control {
+    padding-right: 100px;
+}
+
+/* ===== BUTTONS ===== */
+.profile-form .btn-register {
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+.profile-form .btn-secondary {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border-radius: 8px;
+}
+
+/* ===== ALERTS ===== */
+.content .alert {
+    margin: 0 0 20px 0;
+    max-width: none;
+}
+
+.content .alert ul {
+    margin: 0;
+    padding-left: 20px;
+    text-align: left;
+}
+
+.content .alert li {
+    margin-bottom: 4px;
+}
+
+
