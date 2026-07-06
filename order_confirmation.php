@@ -23,23 +23,23 @@ if($order_id != $_SESSION['last_order_id']) {
     exit ();
 }
 //get order info
-$stmt=$conn->prepare("SELECT * FROM orders WHERE Order_ID=? AND User_ID=?");
-$stmt->bind_param("ii", $order_id, $user_id);
-$stmt->execute();
-$order=$stmt->get_result()->fetch_assoc();
+$get_order_info=$conn->prepare("SELECT * FROM orders WHERE Order_ID=? AND User_ID=?");
+$get_order_info->bind_param("ii", $order_id, $user_id);
+$get_order_info->execute();
+$order=$get_order_info->get_result()->fetch_assoc();
 
 if(!$order) {
     header('Location: home.php');
     exit();
 }
 //get order item
-$stmt2=$conn->prepare("SELECT *
+$get_order_item=$conn->prepare("SELECT *
 FROM order_items
 WHERE Order_ID=?");
 
-$stmt2->bind_param("i", $order_id);
-$stmt2->execute();
-$items=$stmt2->get_result();
+$get_order_item->bind_param("i", $order_id);
+$get_order_item->execute();
+$items=$get_order_item->get_result();
 
 
 unset($_SESSION['last_order_id']); 
@@ -52,6 +52,8 @@ unset($_SESSION['last_order_id']);
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Order Confirmation</title>
+    <link rel="stylesheet" href="css/template.css">
+    <link rel="stylesheet" href="css/order_confirmation.css">
 </head>
 <body>
     <!--show success alert message-->
@@ -63,7 +65,6 @@ unset($_SESSION['last_order_id']);
 
     <div class="order_confirmation_container">
         <div class="success_card">
-            <div class="success_icon">✓</div>
             <h1>Order Place Successfully!</h1>
             <p class="order_number">Order number: <span><?=htmlspecialchars($order['Order_Number']) ?></span></p>
             <p>Thank you for your purchase. We appreciate your support and are thrilled you chose us.</p>
@@ -74,25 +75,26 @@ unset($_SESSION['last_order_id']);
         <div class="info">
             <div class="info_box">
                 <h3>Shipping Information</h3>
-                <p>Shipping Name: <?=htmlspecialchars($order['Shipping_Name']) ?></p>
-                <p>Phone: <?=htmlspecialchars($order['Shipping_Phone']) ?></p>
-                <p>Shipping Address: <?=htmlspecialchars($order['Shipping_Address']) ?></p>
+                <p><strong>Shipping Name: <?=htmlspecialchars($order['Shipping_Name']) ?></strong></p>
+                <p><strong>Phone: <?=htmlspecialchars($order['Shipping_Phone']) ?></strong></p>
+                <p><strong>Shipping Address: <?=htmlspecialchars($order['Shipping_Address']) ?></strong></p>
             </div>
 
             <div class="info_box">
                 <h3>Payment Information</h3>
-                <p><strong>Paid by: </strong><?=htmlspecialchars($order['Payment_Method']) ?></p>
-                <p><strong>Status: </strong><?=htmlspecialchars($order['Payment_Status']) ?></p>
-                <p><strong>Date: </strong><?=date("d M Y H:i",strtotime($order['Order_Date'])) ?></p>
+                <p><strong>Paid by: <?=htmlspecialchars($order['Payment_Method']) ?></strong></p>
+                <p><strong>Status: <?=htmlspecialchars($order['Payment_Status']) ?></strong></p>
+                <p><strong>Date: <?=date("d M Y H:i",strtotime($order['Order_Date'])) ?></strong></p>
             </div>
-            <?php 
-            if($order['Estimated_Delivery_Date']): ?> 
-            <p><strong>Estimated Delivery: </strong> <?=date('d M Y',strtotime($order['Estimated_Delivery_Date'])) ?></p>
-            <?php endif; ?>
-            
-            <?php 
-            if($order['Actual_Delivery_Date']): ?> <p><strong>Delivery On: </strong> <?=date('d M Y',strtotime($order['Actual_Delivery_Date'])) ?></p>
-            <?php endif; ?>
+
+            <div class="estimate_delivery">
+                <?php if($order['Estimated_Delivery_Date']): ?> 
+                <p><strong>Estimated Delivery: </strong> <?=date('d M Y',strtotime($order['Estimated_Delivery_Date'])) ?></p>
+                <?php endif; ?>
+                
+                <?php if($order['Actual_Delivery_Date']): ?> <p><strong>Delivery On: </strong> <?=date('d M Y',strtotime($order['Actual_Delivery_Date'])) ?></p>
+                <?php endif; ?>
+            </div>
         </div>
 
         <h3 style="margin-bottom: 15px;">Product Ordered</h3>
@@ -116,7 +118,7 @@ unset($_SESSION['last_order_id']);
         <tr>
             <td>
                 <div class="product_info">
-                    <img src="uploads/<?=htmlspecialchars($item['Product_Picture']) ?>"
+                    <img src="<?=htmlspecialchars($item['Product_Picture']) ?>"
                     alt="<?=htmlspecialchars($item['Product_Name']) ?>" class="product_img">
                     
                     <div class="product_details">
@@ -136,21 +138,21 @@ unset($_SESSION['last_order_id']);
     <!--order summary-->
     <div class="summary">
         <div class="summary_row">
-            <span>Subtotal:</span>
-            <span>RM <?=number_format($order['Subtotal'],2) ?></span>
+            <span><strong>Subtotal:</strong></span>
+            <span><strong>RM <?=number_format($order['Subtotal'],2) ?></strong></span>
         </div>
         <div class="summary_row">
-            <span>Shipping Fee:</span>
-            <span>RM <?=number_format($order['Shipping_Fee'],2) ?></span>
+            <span><strong>Shipping Fee:</strong></span>
+            <span><strong>RM <?=number_format($order['Shipping_Fee'],2) ?></strong></span>
         </div>
         <div class="summary_row">
-            <span>Tax:</span>
-            <span>RM <?=number_format($order['Tax_Amount'],2) ?></span>
+            <span><strong>Tax:</strong></span>
+            <span><strong>RM <?=number_format($order['Tax_Amount'],2) ?></strong></span>
         </div>
         <?php if($order['Discount_Amount'] > 0): ?>
             <div class="summary_row">
-                <span>Discount:</span>
-                <span>-RM <?=number_format($order['Discount_Amount'],2) ?></span>
+                <span><strong>Discount:</strong></span>
+                <span><strong>-RM <?=number_format($order['Discount_Amount'],2) ?></strong></span>
             </div>
             <?php endif; ?>
             <div class="summary_row summary_total">
@@ -158,12 +160,14 @@ unset($_SESSION['last_order_id']);
                 <span>RM <?=number_format($order['Total_Amount'],2) ?></span>
             </div>
         </div>
+
+        <div class="button">
+            <a href="order_history.php" class="btn btn-primary btn-large">View Order History</a>
+            <br>
+            <a href="product.php" class="btn btn-secondary btn-large">Continue Shopping</a>
+        </div>
     </div>
 
-    <div class="button">
-        <a href="order_history.php" class="btn-primary">View Order History</a>
-        <a href="home.php" class="btn-secondary">Continue Shopping</a>
-    </div>
 </div>
 
 </body>
