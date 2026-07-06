@@ -38,21 +38,34 @@ if(!empty($items)) {
 } 
 
 //check voucher
-    $stmt=$conn->prepare("SELECT * FROM vouchers 
+    $check_voucher=$conn->prepare("SELECT * FROM vouchers 
     WHERE Voucher_Code = ? 
-    AND Status = 'Active'
-    AND Expiry_Date >= NOW()
-    AND (Usage_Limit IS NULL OR Used_Count < Usage_Limit)");
+    AND Status = 'Active' 
+    AND (Expiry_Date IS NULL OR DATE(Expiry_Date)>= CURDATE())
+    AND (Usage_Limit >0 AND Used_Count < Usage_Limit)");
 
-    $stmt->bind_param("s", $voucher_code);
-    $stmt->execute();
-    $voucher=$stmt->get_result()->fetch_assoc();
+    $check_voucher->bind_param("s", $voucher_code);
+    $check_voucher->execute();
+    $voucher=$check_voucher->get_result()->fetch_assoc();
 
             if(!$voucher) {
                 echo json_encode(['success' => false, 'message' => 'Invalid voucher code.']);
                 exit();
             } 
 
+            //check level
+            $check_level=$conn->prepare("SELECT level_id FROM users WHERE User_ID=?");
+            $check_level->bind_param("i", $user_id);
+            $check_level->execute();
+            $user_level_id=$check_level->get_result()->fetch_assoc()['level_id'];
+            $check_level->close();
+
+            if(!empty($voucher['restricted_to_level_id']) && $user_level_id !=$voucher['restricted_to_level_id']) {
+                echo json_encode(['success' => false, 'message' => 'This voucher is only for specific membership levels.']);
+                exit();
+            }
+
+            //check subtotal reach minimum spend 
             if($subtotal < $voucher['Minimum_Spend']) {
                 echo json_encode(['success' => false, 'message' => 'Minimum spend of RM'.number_format($voucher['Minimum_Spend'], 2).' not reached.']);
                 exit();
@@ -67,7 +80,7 @@ if(!empty($items)) {
                 $usage_data=$usage_stmt->get_result()->fetch_assoc();
                 $used=$usage_data['used'];
 
-                if(!is_null($voucher['Usage_Per_User']) && $used>=$voucher['Usage_Per_User']) {
+                if(($voucher['Usage_Per_User'] <=0) || $used>=$voucher['Usage_Per_User']) {
                     echo json_encode(['success'=> false, 'message' => 'You have used this voucher over the limit.']);
                     exit();
                 }
