@@ -13,9 +13,11 @@ $full_name= '';
 $phone= '';
 $state = '';
 $postcode = '';
-$address= '';
+$address_line1= '';
+$address_line2= '';
+$city='';
 $unit_no= '';
-$delivery_notes= '';
+$remarks= '';
 $label= 'Home';
 $is_default= 0;
 
@@ -29,9 +31,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $phone= trim($_POST['phoneNumber'] ?? '');
     $state = trim($_POST['state'] ?? '');
     $postcode = trim($_POST['postcode'] ?? '');
-    $address= trim($_POST['address'] ?? '');
+    $address_line1= trim($_POST['address_line1'] ?? '');
+    $address_line2= trim($_POST['address_line2'] ?? '');
+    $city=trim($_POST['city'] ?? '');
     $unit_no= trim($_POST['unit_no'] ?? '');
-    $delivery_notes= trim($_POST['delivery_notes'] ?? '');
+    $remarks= trim($_POST['remarks'] ?? '');
     $label=$_POST['label'] ?? 'Home';
     $is_default= isset($_POST['is_default']) ?1:0;
     
@@ -52,10 +56,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     elseif (!preg_match('/^\d{5}$/', $postcode)) 
         $errors[] = 'Postcode must be 5 digits.';
     
-    if (empty($address)) 
-        $errors[] = 'Please enter the complete address.';
-    elseif (strlen($address) < 10) 
-        $errors[] = 'Address must be at least 10 characters.';
+    if (empty($address_line1)) 
+        $errors[] = 'Please enter the address line 1 field.';
+    elseif (strlen($address_line1) < 5) 
+        $errors[] = 'Address must be at least 5 characters.';
+
+    if(empty($city)){
+        $errors[] = 'Please select the city.';
+    } 
 
     if(empty($errors)) {    
         if($is_default) { //if set as default, clear other address default
@@ -65,10 +73,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }//insert new address
         $stmt = $conn->prepare("INSERT INTO user_address 
         (User_ID, Full_Name, Phone, State, 
-        postcode, Address, Unit_No, Delivery_Notes, 
+        postcode, address_line1, address_line2, city, Unit_No, Remarks, 
         Label, Is_Default, Created_At)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, Now())");
-        $stmt->bind_param("issssssssi", $user_id, $full_name, $phone, $state, $postcode, $address, $unit_no, $delivery_notes, $label, $is_default);
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, Now())");
+        $stmt->bind_param("issssssssssi", $user_id, $full_name, $phone, $state, $postcode, $address_line1, $address_line2, $city, $unit_no, $remarks, $label, $is_default);
 
         if( $stmt->execute()) {
             $_SESSION['success']="Address added successfully!";
@@ -79,6 +87,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
     }
 
+}
+$get_city=$conn->query("SELECT state_name, city_name FROM cities ORDER BY state_name, city_name");
+$city_by_state=[];
+while($city_result=$get_city->fetch_assoc()){
+    $state_data=$city_result['state_name'];
+    $city_data=$city_result['city_name'];
+    if(!isset($city_by_state[$state_data])){
+        $city_by_state[$state_data]=[];
+    }
+    $city_by_state[$state_data][]=$city_data;
 }
 ?>
   
@@ -101,21 +119,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             </div>
 
         <?php if(!empty($errors)): ?>   
-            <div class="error-message" style="color:red; border:1px solid red; padding:10px; margin-bottom:20px;">
+            <div class="error-message" id="errorAlert">
                 <?=implode('<br>', array_map('htmlspecialchars',$errors)) ?>
             </div>
         <?php endif; ?>
 
-        <?php if($success): ?>
-                <div class="success-message" style="color:green; border:1px solid green; padding:10px; margin-bottom:20px;">
-                <?=htmlspecialchars($success); ?>
-            </div>
-        <?php endif; ?>
         
         <form method="POST" action="" class="register-form" id="addressForm" novalidate>
             <div class="form-group">
                 <label class="form-label">Full Name </label>
-                <input type="text" name="full_name" class="form-control" 
+                <input type="text" id="full_name" name="full_name" class="form-control" 
                     value="<?= htmlspecialchars($full_name) ?>" 
                     placeholder="Enter your full name" required>
                 <small class="error-message" id="fullNameError"></small>
@@ -123,7 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             <div class="form-group">
                 <label class="form-label">Phone Number </label>
-                <input type="tel" name="phoneNumber" class="form-control"
+                <input type="tel" id="phoneNumber" name="phoneNumber" class="form-control"
                         value="<?= htmlspecialchars($phone) ?>" 
                         pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}" 
                         placeholder="123-456-7890" required>
@@ -131,29 +144,49 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <small class="error-message" id="phoneError"></small>
             </div>
 
-            <div class="form-group">
-                <label class="form-label">State </label>
-                <select name="state" id ="stateSelect" class="form-control" required>
-                    <option value="">Select your state</option>
-                    <option value="Johor"<?=$state=='Johor'?'selected':''?>>Johor</option>
-                    <option value="Kedah"<?=$state=='Kedah'?'selected':''?>>Kedah</option>
-                    <option value="Kelantan"<?=$state=='Kelantan'?'selected':''?>>Kelantan</option>
-                    <option value="Malacca"<?=$state=='Malacca'?'selected':''?>>Malacca</option>
-                    <option value="Negeri Sembilan"<?=$state=='Negeri Sembilan'?'selected':''?>>Negeri Sembilan</option>
-                    <option value="Pahang"<?=$state=='Pahang'?'selected':''?>>Pahang</option>
-                    <option value="Perak"<?=$state=='Perak'?'selected':''?>>Perak</option>
-                    <option value="Perlis"<?=$state=='Perlis'?'selected':''?>>Perlis</option>
-                    <option value="Penang"<?=$state=='Penang'?'selected':''?>>Penang</option>
-                    <option value="Sabah"<?=$state=='Sabah'?'selected':''?>>Sabah</option>
-                    <option value="Sarawak"<?=$state=='Sarawak'?'selected':''?>>Sarawak</option>
-                    <option value="Selangor"<?=$state=='Selangor'?'selected':''?>>Selangor</option>
-                    <option value="Terengganu"<?=$state=='Terengganu'?'selected':''?>>Terengganu</option>
-                    <option value="Wilayah Persekutuan Kuala Lumpur"<?=$state=='Wilayah Persekutuan Kuala Lumpur'?'selected':''?>>Wilayah Persekutuan Kuala Lumpur</option>
-                    <option value="Wilayah Persekutuan Putrajaya"<?=$state=='Wilayah Persekutuan Putrajaya'?'selected':''?>>Wilayah Persekutuan Putrajaya</option>
-                    <option value="Wilayah Persekutuan Labuan"<?=$state=='Wilayah Persekutuan Labuan'?'selected':''?>>Wilayah Persekutuan Labuan</option>
-                </select>
-                <small class="error-message" id="stateError"></small>
+            <div class="form-group">    
+                <label class="form-label">Address Line 1</label>
+                <input type="text" name="address_line1" id="address" class="form-control"
+                    value="<?= htmlspecialchars($address_line1) ?>"
+                    placeholder="12, Jalan Bukit Beruang 5" required>
+                <small class="password-hint">Do not include the state and postcode</small>
+                <small class="error-message" id="addressError"></small>
             </div>
+            <div class="form-group">    
+                <label class="form-label">Address Line 2 (Optional)</label>
+                <input type="text" name="address_line2" class="form-control"
+                    value="<?= htmlspecialchars($address_line2) ?>"
+                    placeholder="Taman Bukit Melaka">
+            </div>
+
+  <?php 
+    $get_states=$conn->prepare("SELECT state_name FROM shipping_fee_setting WHERE status='Active'
+    ORDER BY state_name ASC");
+    $get_states->execute();
+    $states=$get_states->get_result();
+    ?>
+
+    <div class="form-group">
+        <label class="form-label">State </label>
+        <select name="state" id ="stateSelect" class="form-control" required>
+            <option value="">Select your state</option>
+            <?php while($STATE=$states->fetch_assoc()): ?>
+                <option value="<?=htmlspecialchars($STATE['state_name'])?>"
+                <?=($state==$STATE['state_name']) ?'selected':''?>> <!--drop down-->
+                <?=htmlspecialchars($STATE['state_name'])?> 
+                </option>
+            <?php endwhile; ?>
+        </select>
+        <small class="error-message" id="stateError"></small>
+    </div>
+    
+    <div class="form-group">
+        <label class="form-label">City </label>
+        <select name="city" id ="citySelect" class="form-control" required>
+            <option value="">Select your city</option>
+        </select> <!--load city will auto show the city for that state-->
+        <small class="error-message" id="cityError"></small>
+    </div>
 
             <div class="form-group">
                 <label class="form-label">Postcode</label>
@@ -164,27 +197,20 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <small class="error-message" id="postcodeError"></small>
             </div>
                         
-            <div class="form-group">
-                <label class="form-label">Address</label>
-                <textarea name="address" class="form-control" rows="3" 
-                    placeholder="Enter your full address" required><?= htmlspecialchars($address) ?>
-                </textarea>
-                <small class="password-hint">Please provide complete address for delivery</small>
-                <small class="error-message" id="addressError"></small>
-            </div>
+
 
             <div class="form-group">
                 <label class="form-label">Unit No (optional)</label>
                 <input type="text" name="unit_no" id="unit_no" class="form-control"
                 value="<?=htmlspecialchars($unit_no) ?>"
-                placeholder="example: A-12-1, Block B"/>
+                placeholder="A-12-1, Block B"/>
             </div>
 
             <div class="form-group">
-                <label class="form-label">Comment (optional)</label>
-                <input type="text" name="delivery_notes" id="delivery_notes" class="form-control"
-                value="<?=htmlspecialchars($delivery_notes) ?>"
-                placeholder="example: put on the gate"/>
+                <label class="form-label">Remark (optional)</label>
+                <input type="text" name="remarks" id="remarks" class="form-control"
+                value="<?=htmlspecialchars($remarks) ?>"
+                placeholder="put on the gate"/>
             </div>
 
             <div class="form-group">
@@ -202,16 +228,21 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </label>
             </div>
 
-            <button type="submit" class="btn-register">Add address</button>
-            <a href="address_list.php" class="btn-secondary" 
-            style="display:inline-block; margin-top:10px;">Cancel</a>
+            <button type="submit" id="submitBtn" class="btn-register">Add address</button>
+            <a href="address_list.php" class="cancel-btn">Cancel</a>
             </form>
         </div>
     </section>
 
     <?php include_once 'includes/footer.php'; ?>
     
-    <script src="js/address.js"></script>        
+    <script>
+    const cityByState=<?php echo json_encode($city_by_state); ?>;
+    const selectedCity=<?php echo json_encode($city); ?>;
+    </script>
+
+    <script src="js/address.js"></script>    
+    <script src="js/alert.js"></script>    
 </body>
 </html> 
 
