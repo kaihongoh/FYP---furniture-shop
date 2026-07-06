@@ -19,8 +19,8 @@ unset($_SESSION['error']);
 //check user all address, the default address will be first one
 $stmt = $conn->prepare('SELECT * FROM user_address 
 WHERE User_ID=? 
-ORDER BY Is_Default DESC, Createed_At DESC');
-$stmt->bind_param('i', $user_id);//i or s
+ORDER BY Is_Default DESC, Created_At DESC');
+$stmt->bind_param('i', $user_id);
 $stmt->execute();
 $result=$stmt->get_result();
 $address=$result->fetch_all(MYSQLI_ASSOC);
@@ -33,32 +33,47 @@ $address=$result->fetch_all(MYSQLI_ASSOC);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Address</title>
     <link rel="stylesheet" href="css/template.css">
-    <link rel="stylesheet" href="css/register.css">
+    <link rel="stylesheet" href="css/address_list.css">
 </head>
 <body>
     <?php include_once 'includes/header.php'; ?>
 
     <div class="container">
-        <div class="register-container" style="margin-top:20px;">
+            <div class="profile-wrapper">
+                <div class="profile-sidebar">
+                    <?php
+                    // Get current filename to set active class
+                    $current_page = basename($_SERVER['PHP_SELF']);
+                    ?>
+                    <a href="user_profile.php" class="nav-link <?php echo ($current_page == 'user_profile.php') ? 'active' : ''; ?>">
+                        User Profile
+                    </a>        
+                    <a href="address_list.php" class="nav-link <?php echo ($current_page == 'address_list.php') ? 'active' : ''; ?>">
+                        My Address
+                    </a>
+                </div>
+            </div>
+
+        <div class="address_list-container">
             <div class="form-header">
-                <h2 class="register-title">My Address</h2>
+                <h2 class="address-title">My Address</h2>
                 <p class="form-subtitle">Manage your shipping address</p>
             </div>
 
             <?php if($success): ?>
-                <div class="success-message">
+                <div class="alert alert-success" id="successAlert">
                     <?=htmlspecialchars($success) ?>
                 </div>
             <?php endif; ?>
 
             <?php if($error): ?>
-                <div class="error-message">
+                <div class="error-message" id="errorAlert">
                     <?=htmlspecialchars($error) ?>
                 </div>
             <?php endif; ?>
 
             <div class="address-list">
-                <div style="margin-bottom:20px;">
+                <div>
                     <a href="add_address.php" class="add-address-btn">+ Add new address</a>
                 </div>
 
@@ -76,7 +91,17 @@ $address=$result->fetch_all(MYSQLI_ASSOC);
                                 <?php endif; ?>
                                 <span class="address-label"><?=htmlspecialchars($adrs['Label']) ?></span>
                             </p>
-                            <p><?=htmlspecialchars($adrs['Address']) ?></p>
+
+                            <p>
+                                <?php                             
+                                $full_address=$adrs['address_line1'];
+                                if(!empty($adrs['address_line2'])) {
+                                    $full_address .=', ' . $adrs['address_line2'];
+                                }
+                                $full_address .=', ' . $adrs['city'] . ', ' . $adrs['postcode'] . ', ' . $adrs['State'];
+                                echo htmlspecialchars($full_address);
+                                ?>
+                            </p>
                             <p><i>Phone: </i><?=htmlspecialchars($adrs['Phone']) ?></p>
                         </div>
                         <div class="address-action">
@@ -85,7 +110,7 @@ $address=$result->fetch_all(MYSQLI_ASSOC);
                             <?php if (!$adrs['Is_Default']): ?>
                                 <a href="set_default_address.php?id=<?= $adrs['Address_ID'] ?>" 
                                 class="setDefault-btn" 
-                                onclick="return confirm ('Set this as your default address?');">
+                                onclick="return confirm('Set this as your default address?');">
                                 Set as Default</a>
                             <?php endif; ?>
                         </div>
@@ -96,5 +121,7 @@ $address=$result->fetch_all(MYSQLI_ASSOC);
     </div>
     
     <?php include_once 'includes/footer.php'; ?>
+    <script src="js/address.js"></script>
+    <script src="js/alert.js"></script>
 </body>
 </html>
